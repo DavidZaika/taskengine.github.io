@@ -119,6 +119,27 @@
     font-weight: 700; font-size: 13px; transition: background 0.2s; white-space: nowrap;
   }
   .form-row button:hover { background: var(--blue-dark); }
+
+  /* Consent checkbox */
+  .consent-wrap {
+    display: flex; align-items: flex-start; gap: 10px;
+    width: 100%; text-align: left;
+  }
+  .consent-wrap input[type="checkbox"] {
+    width: 17px; height: 17px; min-width: 17px; margin-top: 2px;
+    accent-color: var(--blue); cursor: pointer; border-radius: 4px;
+  }
+  .consent-wrap label {
+    font-size: 12px; color: var(--gray); line-height: 1.5; cursor: pointer;
+  }
+  .consent-wrap label a { color: var(--blue); text-decoration: underline; }
+  .consent-error {
+    display: none; width: 100%; font-size: 12px;
+    color: #cc3300; background: rgba(255,80,0,0.06);
+    border: 1px solid rgba(255,80,0,0.18); border-radius: 8px;
+    padding: 8px 14px;
+  }
+
   .success-msg {
     display: none; background: rgba(26,107,255,0.06);
     border: 1px solid rgba(26,107,255,0.2); border-radius: 12px;
@@ -229,6 +250,9 @@
   .bottom-cta .form-row button:hover { background: var(--gold-dark); color: white; }
   .bottom-cta .success-msg { background: rgba(245,200,66,0.1); border-color: rgba(245,200,66,0.3); color: var(--gold); }
   .bottom-cta .form-note { color: rgba(255,255,255,0.3); }
+  .bottom-cta .consent-wrap label { color: rgba(255,255,255,0.55); }
+  .bottom-cta .consent-wrap label a { color: var(--gold); }
+  .bottom-cta .consent-error { color: #ffb380; background: rgba(255,120,0,0.12); border-color: rgba(255,120,0,0.25); }
 
   footer {
     border-top: 1px solid rgba(26,107,255,0.1); padding: 28px 48px;
@@ -270,8 +294,15 @@
     <input class="form-name" type="text" id="nameInput" placeholder="Your full name" />
     <div class="form-row">
       <input type="email" id="emailInput" placeholder="Enter your university email" />
-      <button onclick="submitForm('nameInput','emailInput','successMsg')">Get Early Access →</button>
+      <button onclick="submitForm('nameInput','emailInput','consentCheck1','consentError1','successMsg')">Get Early Access →</button>
     </div>
+    <div class="consent-wrap">
+      <input type="checkbox" id="consentCheck1" />
+      <label for="consentCheck1">
+        I agree to the processing of my personal data (name and email address) by TaskEngine for the purpose of sending product updates and launch notifications. You can withdraw consent at any time. See our <a href="#" onclick="return false;">Privacy Policy</a>.
+      </label>
+    </div>
+    <div class="consent-error" id="consentError1">⚠ Please accept the personal data processing agreement to continue.</div>
     <div class="success-msg" id="successMsg">✅ You're on the list! We'll be in touch soon.</div>
     <p class="form-note">No spam. Just updates when we launch. 🔒</p>
   </div>
@@ -357,8 +388,15 @@
       <input class="form-name" type="text" id="nameInput2" placeholder="Your full name" />
       <div class="form-row">
         <input type="email" id="emailInput2" placeholder="Your university email" />
-        <button onclick="submitForm('nameInput2','emailInput2','successMsg2')">Join Waitlist →</button>
+        <button onclick="submitForm('nameInput2','emailInput2','consentCheck2','consentError2','successMsg2')">Join Waitlist →</button>
       </div>
+      <div class="consent-wrap">
+        <input type="checkbox" id="consentCheck2" />
+        <label for="consentCheck2">
+          I agree to the processing of my personal data (name and email address) by TaskEngine for the purpose of sending product updates and launch notifications. You can withdraw consent at any time. See our <a href="#" onclick="return false;">Privacy Policy</a>.
+        </label>
+      </div>
+      <div class="consent-error" id="consentError2">⚠ Please accept the personal data processing agreement to continue.</div>
       <div class="success-msg" id="successMsg2">✅ You're on the list! We'll be in touch soon.</div>
       <p class="form-note">No spam. Just updates when we launch. 🔒</p>
     </div>
@@ -384,16 +422,27 @@
   const NAME_ENTRY = '649640546';
   const EMAIL_ENTRY = '1292589978';
 
-  function submitForm(nameId, emailId, msgId) {
+  function submitForm(nameId, emailId, consentId, consentErrorId, msgId) {
     const name = document.getElementById(nameId).value.trim();
     const email = document.getElementById(emailId).value.trim();
+    const consent = document.getElementById(consentId).checked;
+    const consentError = document.getElementById(consentErrorId);
+
     if (!name) { alert('Please enter your name.'); return; }
     if (!email || !email.includes('@')) { alert('Please enter a valid email.'); return; }
+    if (!consent) {
+      consentError.style.display = 'block';
+      document.getElementById(consentId).focus();
+      return;
+    }
+    consentError.style.display = 'none';
+
     const url = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse?entry.${NAME_ENTRY}=${encodeURIComponent(name)}&entry.${EMAIL_ENTRY}=${encodeURIComponent(email)}&submit=Submit`;
     fetch(url, { method: 'POST', mode: 'no-cors' }).catch(() => {});
     document.getElementById(msgId).style.display = 'block';
     document.getElementById(nameId).value = '';
     document.getElementById(emailId).value = '';
+    document.getElementById(consentId).checked = false;
   }
 </script>
 </body>
